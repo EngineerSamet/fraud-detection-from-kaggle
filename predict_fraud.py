@@ -49,7 +49,7 @@ class FraudDetectionPipeline:
     Production-ready fraud detection pipeline.
     
     This class encapsulates the complete fraud detection workflow:
-    1. Load trained models (scaler, IsolationForest, LGBM)
+    1. Load trained models (IsolationForest, LGBM)
     2. Preprocess transaction
     3. Generate anomaly score
     4. Predict fraud probability
@@ -68,7 +68,6 @@ class FraudDetectionPipeline:
             Directory containing trained models
         """
         self.models_dir = models_dir
-        self.scaler = None
         self.isolation_forest = None
         self.lgbm_model = None
         self.feature_names = None
@@ -102,18 +101,6 @@ class FraudDetectionPipeline:
             True if all models loaded successfully
         """
         try:
-            # Load scaler
-            scaler_path = os.path.join(self.models_dir, "scaler.pkl")
-            if not os.path.exists(scaler_path):
-                print(f"⚠️  Scaler not found at {scaler_path}")
-                print("   Creating placeholder scaler (models must be in same directory)")
-                # For now, we'll handle this in preprocessing
-                self.scaler = None
-            else:
-                with open(scaler_path, 'rb') as f:
-                    self.scaler = pickle.load(f)
-                print(f"✓ Scaler loaded from {scaler_path}")
-            
             # Load IsolationForest (for anomaly score)
             if_path = os.path.join(self.models_dir, "isolation_forest_feature.pkl")
             if os.path.exists(if_path):
@@ -148,7 +135,7 @@ class FraudDetectionPipeline:
             print(f"❌ Error loading models: {e}")
             return False
     
-    def preprocess_transaction(self, transaction: Dict[str, float]) -> np.ndarray:
+    def preprocess_transaction(self, transaction: Dict[str, float]) -> pd.DataFrame:
         """
         Preprocess a single transaction.
         
@@ -159,10 +146,10 @@ class FraudDetectionPipeline:
         
         Returns:
         --------
-        np.ndarray
-            Preprocessed feature vector (30 features, scaled)
+        pd.DataFrame
+            Preprocessed feature DataFrame (30 features)
         """
-        # Convert to DataFrame
+        # Convert to DataFrame with feature names
         df = pd.DataFrame([transaction])
         
         # Ensure all required features exist
@@ -170,27 +157,19 @@ class FraudDetectionPipeline:
             if feature not in df.columns:
                 raise ValueError(f"Missing required feature: {feature}")
         
-        # Select features in correct order
-        X = df[self.feature_names].values
+        # Select features in correct order and keep as DataFrame
+        X_df = df[self.feature_names]
         
-        # Scale features (if scaler available)
-        if self.scaler is not None:
-            X_scaled = self.scaler.transform(X)
-        else:
-            # If no scaler, assume transaction is already scaled
-            print("⚠️  Warning: No scaler available, assuming transaction is pre-scaled")
-            X_scaled = X
-        
-        return X_scaled
+        return X_df
     
-    def calculate_anomaly_score(self, X: np.ndarray) -> float:
+    def calculate_anomaly_score(self, X: pd.DataFrame) -> float:
         """
         Calculate anomaly score using IsolationForest.
         
         Parameters:
         -----------
-        X : np.ndarray
-            Preprocessed feature vector (30 features)
+        X : pd.DataFrame
+            Preprocessed feature DataFrame (30 features)
         
         Returns:
         --------
@@ -206,14 +185,14 @@ class FraudDetectionPipeline:
         anomaly_score = self.isolation_forest.score_samples(X)[0]
         return anomaly_score
     
-    def predict_fraud_probability(self, X: np.ndarray, anomaly_score: float) -> float:
+    def predict_fraud_probability(self, X: pd.DataFrame, anomaly_score: float) -> float:
         """
         Predict fraud probability using LGBM model.
         
         Parameters:
         -----------
-        X : np.ndarray
-            Preprocessed feature vector (30 features)
+        X : pd.DataFrame
+            Preprocessed feature DataFrame (30 features)
         anomaly_score : float
             Anomaly score from IsolationForest
         
@@ -222,8 +201,9 @@ class FraudDetectionPipeline:
         float
             Fraud probability (0-1)
         """
-        # Add anomaly score to features
-        X_with_anomaly = np.column_stack([X, anomaly_score])
+        # Add anomaly score to DataFrame
+        X_with_anomaly = X.copy()
+        X_with_anomaly['anomaly_score'] = anomaly_score
         
         # Predict probability
         proba = self.lgbm_model.predict_proba(X_with_anomaly)[0, 1]
