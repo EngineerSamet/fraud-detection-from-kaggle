@@ -585,9 +585,8 @@ This project welcomes contributions! Areas for improvement:
 3. [SHAP: A Unified Approach to Interpreting Model Predictions](https://arxiv.org/abs/1705.07874)
 4. [Learning from Imbalanced Data](https://www.sciencedirect.com/science/article/abs/pii/S0957417416307175)
 
-**Datasets:**
+**Dataset:**
 - [Kaggle - Credit Card Fraud Detection](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud)
-- Original paper: [Calibrating Probability with Undersampling for Unbalanced Classification](https://ieeexplore.ieee.org/document/7371846)
 
 **Tools & Libraries:**
 - [scikit-learn](https://scikit-learn.org/) - Machine learning framework
@@ -605,27 +604,11 @@ This project welcomes contributions! Areas for improvement:
 **GitHub:** [EngineerSamet](https://github.com/EngineerSamet)
 
 **Course:** Introduction to Machine Learning  
-**Institution:** [Your University]  
+**Institution:** Mugla Sitki Kocman University
 **Semester:** Fall 2024-2025
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
-
-**Dataset License:** [Open Database License (ODbL)](http://opendatacommons.org/licenses/odbl/1.0/)
-
----
-
-## 🙏 Acknowledgments
-
-- **Kaggle** for providing the high-quality dataset
-- **Machine Learning in Action (ULB)** for the original dataset curation
-- **scikit-learn team** for the excellent ML framework
-- **SHAP developers** for interpretability tools
-
----
 
 **⭐ If this project helps you, please consider giving it a star!**
 
@@ -641,6 +624,6 @@ If you use this project in your research or work, please cite:
   title = {Credit Card Fraud Detection - Production-Ready ML System},
   year = {2024},
   publisher = {GitHub},
-  url = {https://github.com/EngineerSamet/fraud-detection}
+  url = {https://github.com/EngineerSamet/fraud-detection-from-kaggle}
 }
 ```
