@@ -1,0 +1,6 @@
+{
+    "optimal_f2_threshold": 0.5799999999999997,
+    "optimal_youden_threshold": 0.02850852720439434,
+    "optimal_cost_threshold": 0.13,
+    "default_threshold": 0.5
+}

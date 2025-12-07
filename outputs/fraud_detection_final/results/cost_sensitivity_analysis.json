@@ -1,0 +1,46 @@
+{
+    "FN=50_FP=1": {
+        "cost_ratio": 50,
+        "optimal_threshold": 0.13,
+        "min_cost": 612,
+        "default_cost": 683,
+        "cost_reduction_pct": 10.395314787701318,
+        "precision": 0.34146341463414637,
+        "recall": 0.9032258064516129,
+        "f1_score": 0.49557522123893805,
+        "f2_score": 0.6796116504854369
+    },
+    "FN=100_FP=1": {
+        "cost_ratio": 100,
+        "optimal_threshold": 0.07,
+        "min_cost": 1029,
+        "default_cost": 1333,
+        "cost_reduction_pct": 22.80570142535634,
+        "precision": 0.20722891566265061,
+        "recall": 0.9247311827956989,
+        "f1_score": 0.33858267716535434,
+        "f2_score": 0.5463786531130876
+    },
+    "FN=200_FP=1": {
+        "cost_ratio": 200,
+        "optimal_threshold": 0.07,
+        "min_cost": 1729,
+        "default_cost": 2633,
+        "cost_reduction_pct": 34.33345993163692,
+        "precision": 0.20722891566265061,
+        "recall": 0.9247311827956989,
+        "f1_score": 0.33858267716535434,
+        "f2_score": 0.5463786531130876
+    },
+    "FN=500_FP=1": {
+        "cost_ratio": 500,
+        "optimal_threshold": 0.07,
+        "min_cost": 3829,
+        "default_cost": 6533,
+        "cost_reduction_pct": 41.3898668299403,
+        "precision": 0.20722891566265061,
+        "recall": 0.9247311827956989,
+        "f1_score": 0.33858267716535434,
+        "f2_score": 0.5463786531130876
+    }
+}

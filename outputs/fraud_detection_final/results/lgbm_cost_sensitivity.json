@@ -1,0 +1,38 @@
+{
+    "FN=50_FP=1": {
+        "cost_ratio": 50,
+        "optimal_threshold": 0.23000000000000004,
+        "min_cost": 664,
+        "default_cost": 758,
+        "cost_reduction_pct": 12.401055408970976,
+        "precision": 0.851063829787234,
+        "recall": 0.8602150537634409
+    },
+    "FN=100_FP=1": {
+        "cost_ratio": 100,
+        "optimal_threshold": 0.23000000000000004,
+        "min_cost": 1314,
+        "default_cost": 1508,
+        "cost_reduction_pct": 12.86472148541114,
+        "precision": 0.851063829787234,
+        "recall": 0.8602150537634409
+    },
+    "FN=200_FP=1": {
+        "cost_ratio": 200,
+        "optimal_threshold": 0.23000000000000004,
+        "min_cost": 2614,
+        "default_cost": 3008,
+        "cost_reduction_pct": 13.09840425531915,
+        "precision": 0.851063829787234,
+        "recall": 0.8602150537634409
+    },
+    "FN=500_FP=1": {
+        "cost_ratio": 500,
+        "optimal_threshold": 0.23000000000000004,
+        "min_cost": 6514,
+        "default_cost": 7508,
+        "cost_reduction_pct": 13.239211507725093,
+        "precision": 0.851063829787234,
+        "recall": 0.8602150537634409
+    }
+}
