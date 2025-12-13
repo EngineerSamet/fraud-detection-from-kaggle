@@ -594,7 +594,8 @@ def main():
         'XGB_ScalePosWeight': (y_proba_xgb_weighted, "XGBoost (Hybrid)"),
         'LGBM_ClassWeights': (y_proba_lgbm, "LightGBM (Hybrid)"),
         'BalancedBagging_Hybrid': (y_proba_bbagging, "BalancedBagging (Hybrid)"),
-        'EasyEnsemble': (y_proba_easy, "EasyEnsemble")
+        'EasyEnsemble': (y_proba_easy, "EasyEnsemble"),
+        'Voting_LGBM_XGB_RF': (y_proba_voting, "Voting Ensemble (LGBM+XGB+RF)")
     }.items():
         # Confusion Matrix
         plot_confusion_matrix(
