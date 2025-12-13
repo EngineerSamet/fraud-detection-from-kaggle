@@ -72,14 +72,14 @@ class FraudDetectionPipeline:
         self.lgbm_model = None
         self.feature_names = None
         
-        # Optimal thresholds (from training)
+        # Optimal thresholds (from LGBM cost sensitivity analysis)
         self.thresholds = {
             'default': 0.5,
-            'f2_optimized': 0.18,  # From LGBM threshold optimization
-            'cost_50': 0.13,       # FN/FP = 50:1
-            'cost_100': 0.07,      # FN/FP = 100:1 (RECOMMENDED for banking)
-            'cost_200': 0.07,      # FN/FP = 200:1
-            'cost_500': 0.07       # FN/FP = 500:1
+            'f2_optimized': 0.60,  # Champion: 96.30% precision, 83.87% recall
+            'cost_50': 0.23,       # FN/FP = 50:1 (85.11% precision, 86.02% recall)
+            'cost_100': 0.23,      # FN/FP = 100:1 (85.11% precision, 86.02% recall)
+            'cost_200': 0.23,      # FN/FP = 200:1 (85.11% precision, 86.02% recall)
+            'cost_500': 0.23       # FN/FP = 500:1 (85.11% precision, 86.02% recall)
         }
         
         # Risk levels based on probability

@@ -1328,6 +1328,321 @@ def main():
         print("\n💡 INSIGHT: Positive difference = Feature more important for fraud detection")
         print("="*70)
         
+        # =====================================================================
+        # PHASE 6.2: CHAMPION & TOP MODELS SHAP ANALYSIS
+        # =====================================================================
+        
+        print("\n" + "="*70)
+        print("  PHASE 6.2: CHAMPION & TOP MODELS SHAP ANALYSIS")
+        print("="*70)
+        print("\n🏆 Analyzing SHAP for top performing models...")
+        print("   Models: LGBM_Calibrated_Isotonic, XGB_Calibrated_Isotonic,")
+        print("           XGB_Calibrated_Sigmoid, RF_Calibrated_Isotonic, LGBM_Optimized_F2\n")
+        
+        # Define models to analyze
+        # NOTE: For calibrated models, we need to extract the base estimator
+        # CalibratedClassifierCV is a wrapper and not supported by TreeExplainer
+        models_to_analyze = [
+            {
+                'name': 'LGBM_Calibrated_Isotonic',
+                'model': lgbm_calibrated_isotonic.calibrated_classifiers_[0].estimator if hasattr(lgbm_calibrated_isotonic, 'calibrated_classifiers_') else lgbm_weighted,
+                'X_data': X_test_with_anomaly,
+                'display_name': 'LightGBM Calibrated Isotonic (Champion)',
+                'note': 'Using base estimator (calibration removed for SHAP)'
+            },
+            {
+                'name': 'XGB_Calibrated_Isotonic',
+                'model': xgb_calibrated_isotonic.calibrated_classifiers_[0].estimator if hasattr(xgb_calibrated_isotonic, 'calibrated_classifiers_') else xgb_weighted,
+                'X_data': X_test_with_anomaly,
+                'display_name': 'XGBoost Calibrated Isotonic',
+                'note': 'Using base estimator (calibration removed for SHAP)'
+            },
+            {
+                'name': 'XGB_Calibrated_Sigmoid',
+                'model': xgb_calibrated_sigmoid.calibrated_classifiers_[0].estimator if hasattr(xgb_calibrated_sigmoid, 'calibrated_classifiers_') else xgb_weighted,
+                'X_data': X_test_with_anomaly,
+                'display_name': 'XGBoost Calibrated Sigmoid',
+                'note': 'Using base estimator (calibration removed for SHAP)'
+            },
+            {
+                'name': 'RF_Calibrated_Isotonic',
+                'model': rf_calibrated_isotonic.calibrated_classifiers_[0].estimator if hasattr(rf_calibrated_isotonic, 'calibrated_classifiers_') else rf_weighted,
+                'X_data': X_test,
+                'display_name': 'Random Forest Calibrated Isotonic',
+                'note': 'Using base estimator (calibration removed for SHAP)'
+            },
+            {
+                'name': 'LGBM_Optimized_F2',
+                'model': lgbm_calibrated_isotonic.calibrated_classifiers_[0].estimator if hasattr(lgbm_calibrated_isotonic, 'calibrated_classifiers_') else lgbm_weighted,
+                'X_data': X_test_with_anomaly,
+                'display_name': 'LightGBM F2-Optimized (same model as champion)',
+                'note': 'Same base estimator as LGBM_Calibrated_Isotonic'
+            }
+        ]
+        
+        # Create subdirectory for champion models SHAP
+        champion_shap_dir = os.path.join(figures_dir, "shap", "champion_models")
+        os.makedirs(champion_shap_dir, exist_ok=True)
+        
+        # Storage for comparison
+        champion_shap_features = {}
+        
+        for model_info in models_to_analyze:
+            model_name = model_info['name']
+            model = model_info['model']
+            X_data = model_info['X_data']
+            display_name = model_info['display_name']
+            note = model_info.get('note', '')
+            
+            print(f"\n{'='*70}")
+            print(f"  {display_name}")
+            print(f"{'='*70}")
+            if note:
+                print(f"   ℹ️  {note}")
+            
+            try:
+                # Sample data for SHAP (500 samples max)
+                max_shap_samples = 500
+                if len(X_data) > max_shap_samples:
+                    sample_indices = np.random.choice(len(X_data), max_shap_samples, replace=False)
+                    X_shap_sample = X_data.iloc[sample_indices]
+                    print(f"   Using {max_shap_samples} random samples for SHAP analysis")
+                else:
+                    X_shap_sample = X_data
+                    print(f"   Using all {len(X_data)} samples for SHAP analysis")
+                
+                # Create SHAP explainer
+                print(f"   Creating SHAP explainer for {model_name}...")
+                model_explainer = shap.TreeExplainer(model)
+                
+                # Calculate SHAP values
+                print(f"   Computing SHAP values...")
+                model_shap_values = model_explainer(X_shap_sample)
+                
+                # SHAP Summary Plot
+                print(f"   Generating SHAP summary plot...")
+                plt.figure(figsize=(10, 8))
+                shap.summary_plot(
+                    model_shap_values.values,
+                    X_shap_sample,
+                    show=False,
+                    max_display=15
+                )
+                plt.title(f"SHAP Feature Importance - {display_name}", 
+                         fontsize=14, fontweight='bold')
+                plt.tight_layout()
+                summary_path = os.path.join(champion_shap_dir, f"{model_name}_shap_summary.png")
+                plt.savefig(summary_path, dpi=300, bbox_inches='tight')
+                plt.close()
+                print(f"   ✓ Summary plot saved: {summary_path}")
+                
+                # SHAP Bar Plot
+                print(f"   Generating SHAP bar plot...")
+                plt.figure(figsize=(10, 8))
+                shap.summary_plot(
+                    model_shap_values.values,
+                    X_shap_sample,
+                    plot_type="bar",
+                    show=False,
+                    max_display=15
+                )
+                plt.title(f"SHAP Feature Importance (Mean |SHAP|) - {display_name}", 
+                         fontsize=14, fontweight='bold')
+                plt.tight_layout()
+                bar_path = os.path.join(champion_shap_dir, f"{model_name}_shap_bar.png")
+                plt.savefig(bar_path, dpi=300, bbox_inches='tight')
+                plt.close()
+                print(f"   ✓ Bar plot saved: {bar_path}")
+                
+                # Calculate mean absolute SHAP values
+                mean_abs_shap = np.abs(model_shap_values.values).mean(axis=0)
+                feature_names = X_shap_sample.columns
+                
+                model_shap_df = pd.DataFrame({
+                    'feature': feature_names,
+                    'mean_abs_shap': mean_abs_shap
+                }).sort_values('mean_abs_shap', ascending=False)
+                
+                # Store for comparison
+                champion_shap_features[model_name] = model_shap_df
+                
+                # Display top 10 features
+                print(f"\n   Top 10 Features by Mean |SHAP| - {display_name}:")
+                print("   " + "-"*60)
+                for idx, row in model_shap_df.head(10).iterrows():
+                    print(f"   {row['feature']:<20} {row['mean_abs_shap']:>10.4f}")
+                
+                # Save to CSV
+                csv_path = os.path.join(results_dir, f"{model_name}_shap_features.csv")
+                model_shap_df.to_csv(csv_path, index=False)
+                print(f"\n   ✓ SHAP features saved: {csv_path}")
+                
+                # Fraud-only analysis for this model
+                print(f"\n   Analyzing fraud cases only for {display_name}...")
+                
+                # Filter fraud cases
+                fraud_mask_model = y_test == 1
+                X_fraud_model = X_data[fraud_mask_model]
+                
+                # Sample fraud cases
+                max_fraud = 200
+                if len(X_fraud_model) > max_fraud:
+                    fraud_indices = np.random.choice(len(X_fraud_model), max_fraud, replace=False)
+                    X_fraud_sample_model = X_fraud_model.iloc[fraud_indices]
+                else:
+                    X_fraud_sample_model = X_fraud_model
+                
+                # Compute SHAP for fraud cases
+                model_shap_fraud = model_explainer(X_fraud_sample_model)
+                
+                # Fraud-only summary plot
+                plt.figure(figsize=(10, 8))
+                shap.summary_plot(
+                    model_shap_fraud.values,
+                    X_fraud_sample_model,
+                    show=False,
+                    max_display=15
+                )
+                plt.title(f"SHAP Feature Importance (Fraud Cases) - {display_name}", 
+                         fontsize=14, fontweight='bold')
+                plt.tight_layout()
+                fraud_summary_path = os.path.join(champion_shap_dir, f"{model_name}_fraud_shap_summary.png")
+                plt.savefig(fraud_summary_path, dpi=300, bbox_inches='tight')
+                plt.close()
+                print(f"   ✓ Fraud summary plot saved: {fraud_summary_path}")
+                
+                # Fraud-only bar plot
+                plt.figure(figsize=(10, 8))
+                shap.summary_plot(
+                    model_shap_fraud.values,
+                    X_fraud_sample_model,
+                    plot_type="bar",
+                    show=False,
+                    max_display=15
+                )
+                plt.title(f"SHAP Feature Importance (Fraud Cases) - {display_name}", 
+                         fontsize=14, fontweight='bold')
+                plt.tight_layout()
+                fraud_bar_path = os.path.join(champion_shap_dir, f"{model_name}_fraud_shap_bar.png")
+                plt.savefig(fraud_bar_path, dpi=300, bbox_inches='tight')
+                plt.close()
+                print(f"   ✓ Fraud bar plot saved: {fraud_bar_path}")
+                
+                # Calculate fraud-only mean SHAP
+                mean_abs_shap_fraud_model = np.abs(model_shap_fraud.values).mean(axis=0)
+                fraud_shap_df_model = pd.DataFrame({
+                    'feature': X_fraud_sample_model.columns,
+                    'mean_abs_shap_fraud': mean_abs_shap_fraud_model
+                }).sort_values('mean_abs_shap_fraud', ascending=False)
+                
+                # Save fraud-only SHAP
+                fraud_csv_path = os.path.join(results_dir, f"{model_name}_fraud_shap_features.csv")
+                fraud_shap_df_model.to_csv(fraud_csv_path, index=False)
+                print(f"   ✓ Fraud SHAP features saved: {fraud_csv_path}")
+                
+                print(f"\n   ✅ {display_name} SHAP analysis complete!")
+                
+            except Exception as e:
+                print(f"   ⚠️  SHAP analysis failed for {model_name}: {e}")
+                continue
+        
+        # =====================================================================
+        # PHASE 6.3: CHAMPION MODELS SHAP COMPARISON
+        # =====================================================================
+        
+        print("\n" + "="*70)
+        print("  PHASE 6.3: CHAMPION MODELS SHAP COMPARISON")
+        print("="*70)
+        print("\n📊 Comparing SHAP feature importance across top models...\n")
+        
+        if len(champion_shap_features) > 0:
+            # Get all unique features
+            all_features = set()
+            for df in champion_shap_features.values():
+                all_features.update(df['feature'].tolist())
+            
+            # Create comparison DataFrame
+            comparison_data = []
+            for feature in sorted(all_features):
+                row = {'feature': feature}
+                for model_name, shap_df in champion_shap_features.items():
+                    feature_row = shap_df[shap_df['feature'] == feature]
+                    if len(feature_row) > 0:
+                        row[model_name] = feature_row.iloc[0]['mean_abs_shap']
+                    else:
+                        row[model_name] = 0.0
+                comparison_data.append(row)
+            
+            comparison_df = pd.DataFrame(comparison_data)
+            
+            # Calculate average importance across models
+            model_cols = [col for col in comparison_df.columns if col != 'feature']
+            comparison_df['avg_importance'] = comparison_df[model_cols].mean(axis=1)
+            comparison_df = comparison_df.sort_values('avg_importance', ascending=False)
+            
+            # Display top 15 features across all models
+            print("Top 15 Features by Average SHAP Importance (Across Champion Models):")
+            print("="*100)
+            print(f"{'Feature':<20}", end='')
+            for model_name in champion_shap_features.keys():
+                short_name = model_name.replace('_Calibrated_', '_Cal_').replace('_Optimized_', '_Opt_')[:15]
+                print(f"{short_name:>15}", end='')
+            print(f"{'Avg':>12}")
+            print("-"*100)
+            
+            for _, row in comparison_df.head(15).iterrows():
+                print(f"{row['feature']:<20}", end='')
+                for model_name in champion_shap_features.keys():
+                    print(f"{row[model_name]:>15.4f}", end='')
+                print(f"{row['avg_importance']:>12.4f}")
+            
+            # Save comparison
+            comparison_path = os.path.join(results_dir, "champion_models_shap_comparison.csv")
+            comparison_df.to_csv(comparison_path, index=False)
+            print(f"\n✓ SHAP comparison saved: {comparison_path}")
+            
+            # Find consensus features (top 5 in all models)
+            print("\n" + "="*70)
+            print("  CONSENSUS FEATURES (Highly Important Across All Models)")
+            print("="*70)
+            
+            top_5_features = {}
+            for model_name, shap_df in champion_shap_features.items():
+                top_5_features[model_name] = set(shap_df.head(5)['feature'].tolist())
+            
+            # Find intersection
+            if len(top_5_features) > 0:
+                consensus = set.intersection(*top_5_features.values())
+                if len(consensus) > 0:
+                    print(f"\n✨ {len(consensus)} features appear in top 5 of ALL models:")
+                    for feature in sorted(consensus):
+                        print(f"   - {feature}")
+                else:
+                    print("\n⚠️  No features appear in top 5 of ALL models")
+                    print("   Finding features in top 10 of at least 3 models...")
+                    
+                    feature_counts = {}
+                    for model_name, shap_df in champion_shap_features.items():
+                        for feature in shap_df.head(10)['feature']:
+                            feature_counts[feature] = feature_counts.get(feature, 0) + 1
+                    
+                    common_features = [(f, c) for f, c in feature_counts.items() if c >= 3]
+                    common_features.sort(key=lambda x: x[1], reverse=True)
+                    
+                    if len(common_features) > 0:
+                        print(f"\n   {len(common_features)} features in top 10 of ≥3 models:")
+                        for feature, count in common_features[:10]:
+                            print(f"   - {feature} (in {count}/{len(champion_shap_features)} models)")
+            
+            print("\n💡 INSIGHT: Consensus features are most reliable for fraud detection")
+            print("="*70)
+        else:
+            print("⚠️  No SHAP data available for comparison")
+        
+        print("\n✅ Champion models SHAP analysis complete!")
+        print(f"   Total plots generated: {len(champion_shap_features) * 4} (summary, bar, fraud_summary, fraud_bar)")
+        print(f"   📁 Location: {champion_shap_dir}")
+        
     except Exception as e:
         print(f"⚠️  SHAP analysis failed: {e}")
         print("   This is often due to missing 'shap' package.")
@@ -1346,7 +1661,8 @@ def main():
     save_model(xgb_weighted, os.path.join(models_dir, "xgboost.pkl"), "XGBoost")
     
     # Save best performing models (TOP 4)
-    save_model(lgbm_weighted, os.path.join(models_dir, "lightgbm_champion.pkl"), "LightGBM (CHAMPION - PR-AUC 0.88)")
+    # CHAMPION: LGBM_Calibrated_Isotonic (base model for LGBM_Optimized_F2)
+    save_model(lgbm_calibrated_isotonic, os.path.join(models_dir, "lightgbm_champion.pkl"), "LightGBM Calibrated Isotonic (CHAMPION - PR-AUC 0.88)")
     save_model(xgb_calibrated_isotonic, os.path.join(models_dir, "xgboost_calibrated_isotonic.pkl"), "XGBoost Calibrated Isotonic (BEST PRECISION)")
     save_model(voting_clf, os.path.join(models_dir, "voting_ensemble.pkl"), "Voting Ensemble (RF+XGB)")
     save_model(rf_calibrated_isotonic, os.path.join(models_dir, "random_forest_calibrated.pkl"), "Random Forest Calibrated")
