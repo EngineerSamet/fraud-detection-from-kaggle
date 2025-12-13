@@ -1,8 +1,10 @@
 """
 Get real examples from dataset for Streamlit app
+Extract multiple fraud and normal examples to test different patterns
 """
 import pandas as pd
 import json
+import numpy as np
 
 # Load dataset
 df = pd.read_csv('data/raw/creditcard.csv')
@@ -11,21 +13,105 @@ print(f"Total transactions: {len(df)}")
 print(f"Fraud: {df['Class'].sum()} ({df['Class'].sum()/len(df)*100:.2f}%)")
 print(f"Normal: {(df['Class']==0).sum()} ({(df['Class']==0).sum()/len(df)*100:.2f}%)")
 
-# Get random examples
-normal_transaction = df[df['Class']==0].sample(1, random_state=42).iloc[0]
-fraud_transaction = df[df['Class']==1].sample(1, random_state=42).iloc[0]
+# Get multiple examples (5 fraud + 5 normal)
+print("\n" + "="*80)
+print("EXTRACTING 5 FRAUD + 5 NORMAL EXAMPLES")
+print("="*80)
 
-print("\n" + "="*60)
-print("REAL NORMAL TRANSACTION (Class=0)")
-print("="*60)
-normal_dict = normal_transaction.drop('Class').to_dict()
-print(json.dumps(normal_dict, indent=2))
+fraud_examples = []
+normal_examples = []
 
-print("\n" + "="*60)
-print("REAL FRAUD TRANSACTION (Class=1)")
-print("="*60)
-fraud_dict = fraud_transaction.drop('Class').to_dict()
-print(json.dumps(fraud_dict, indent=2))
+# Get 5 fraud examples with different random states
+for i, seed in enumerate([42, 123, 456, 789, 999], 1):
+    fraud = df[df['Class']==1].sample(1, random_state=seed).iloc[0]
+    fraud_dict = fraud.drop('Class').to_dict()
+    fraud_examples.append({
+        'id': f'fraud_{i}',
+        'seed': seed,
+        'data': fraud_dict
+    })
+    
+    normal = df[df['Class']==0].sample(1, random_state=seed).iloc[0]
+    normal_dict = normal.drop('Class').to_dict()
+    normal_examples.append({
+        'id': f'normal_{i}',
+        'seed': seed,
+        'data': normal_dict
+    })
+
+
+# Print all examples
+print("\n" + "="*80)
+print("FRAUD EXAMPLES")
+print("="*80)
+for ex in fraud_examples:
+    print(f"\n--- {ex['id'].upper()} (seed={ex['seed']}) ---")
+    print(f"Amount: ${ex['data']['Amount']:.2f}")
+    print(f"V1={ex['data']['V1']:.2f}, V3={ex['data']['V3']:.2f}, V7={ex['data']['V7']:.2f}")
+
+print("\n" + "="*80)
+print("NORMAL EXAMPLES")
+print("="*80)
+for ex in normal_examples:
+    print(f"\n--- {ex['id'].upper()} (seed={ex['seed']}) ---")
+    print(f"Amount: ${ex['data']['Amount']:.2f}")
+    print(f"V1={ex['data']['V1']:.2f}, V3={ex['data']['V3']:.2f}, V7={ex['data']['V7']:.2f}")
+
+
+# Detailed analysis: Compare V value ranges
+print("\n" + "="*80)
+print("V VALUE RANGE ANALYSIS")
+print("="*80)
+
+v_cols = [f'V{i}' for i in range(1, 29)]
+
+print(f"\n{'Feature':<8} {'Normal Range':>20} {'Fraud Range':>20}")
+print("-" * 60)
+
+for col in v_cols:
+    normal_vals = [ex['data'][col] for ex in normal_examples]
+    fraud_vals = [ex['data'][col] for ex in fraud_examples]
+    
+    normal_range = f"[{min(normal_vals):.2f}, {max(normal_vals):.2f}]"
+    fraud_range = f"[{min(fraud_vals):.2f}, {max(fraud_vals):.2f}]"
+    
+    print(f"{col:<8} {normal_range:>20} {fraud_range:>20}")
+
+# Statistical comparison
+print("\n" + "="*80)
+print("STATISTICAL COMPARISON (All 5 Examples)")
+print("="*80)
+
+fraud_data = df[df['Class']==1][v_cols + ['Amount']]
+normal_data = df[df['Class']==0][v_cols + ['Amount']]
+
+print(f"\n{'Feature':<8} {'Normal Mean':>12} {'Fraud Mean':>12} {'Example Normal':>15} {'Example Fraud':>15}")
+print("-" * 70)
+
+for col in v_cols[:10]:  # First 10 V features
+    normal_mean = normal_data[col].mean()
+    fraud_mean = fraud_data[col].mean()
+    
+    # Average of our examples
+    example_normal = np.mean([ex['data'][col] for ex in normal_examples])
+    example_fraud = np.mean([ex['data'][col] for ex in fraud_examples])
+    
+    print(f"{col:<8} {normal_mean:>12.4f} {fraud_mean:>12.4f} {example_normal:>15.4f} {example_fraud:>15.4f}")
+
+print(f"\nAmount   {normal_data['Amount'].mean():>12.2f} {fraud_data['Amount'].mean():>12.2f}")
+
+# Save examples to JSON for app.py integration
+output_data = {
+    'fraud_examples': fraud_examples,
+    'normal_examples': normal_examples
+}
+
+with open('example_transactions.json', 'w') as f:
+    json.dump(output_data, f, indent=2)
+
+print("\n" + "="*80)
+print("✅ Saved 10 examples to example_transactions.json")
+print("="*80)
 
 # Compare V value ranges
 print("\n" + "="*60)

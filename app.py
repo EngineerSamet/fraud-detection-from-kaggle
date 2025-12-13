@@ -18,6 +18,17 @@ import sys
 sys.path.append(str(Path(__file__).parent))
 from predict_fraud import FraudDetectionPipeline
 
+# Load example transactions
+@st.cache_data
+def load_examples():
+    """Load real transaction examples from JSON file"""
+    try:
+        with open('example_transactions.json', 'r') as f:
+            return json.load(f)
+    except Exception as e:
+        st.warning(f"⚠️ Could not load examples: {e}")
+        return None
+
 # Page configuration
 st.set_page_config(
     page_title="Fraud Detection System",
@@ -44,15 +55,45 @@ st.markdown("""
     }
     .fraud-alert {
         background-color: #ffebee;
-        padding: 1rem;
+        padding: 1.5rem;
         border-radius: 0.5rem;
-        border-left: 4px solid #f44336;
+        border-left: 6px solid #d32f2f;
+    }
+    .fraud-alert h2 {
+        color: #c62828;
+        margin: 0;
+        font-size: 2rem;
+    }
+    .fraud-alert h3 {
+        color: #d32f2f;
+        margin: 0.5rem 0;
+        font-size: 1.5rem;
+    }
+    .fraud-alert p {
+        color: #444;
+        margin: 0.5rem 0 0 0;
+        font-size: 1.1rem;
     }
     .safe-alert {
         background-color: #e8f5e9;
-        padding: 1rem;
+        padding: 1.5rem;
         border-radius: 0.5rem;
-        border-left: 4px solid #4caf50;
+        border-left: 6px solid #2e7d32;
+    }
+    .safe-alert h2 {
+        color: #1b5e20;
+        margin: 0;
+        font-size: 2rem;
+    }
+    .safe-alert h3 {
+        color: #2e7d32;
+        margin: 0.5rem 0;
+        font-size: 1.5rem;
+    }
+    .safe-alert p {
+        color: #444;
+        margin: 0.5rem 0 0 0;
+        font-size: 1.1rem;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -211,40 +252,75 @@ elif page == "🔍 Single Prediction":
     input_method = st.radio("Input Method:", ["Manual Input", "Example Transactions"])
     
     if input_method == "Example Transactions":
-        example_type = st.selectbox(
-            "Select Example:",
-            ["Normal Transaction", "Suspicious Transaction"]
-        )
+        # Load examples
+        examples = load_examples()
         
-        if example_type == "Normal Transaction":
-            # Real normal transaction from dataset (Class=0, random_state=42)
-            transaction = {
-                'Time': 82450.0,
-                'V1': 1.3145, 'V2': 0.5906, 'V3': -0.6666, 'V4': 0.7166,
-                'V5': 0.3020, 'V6': -1.1255, 'V7': 0.3889, 'V8': -0.2884,
-                'V9': -0.1321, 'V10': -0.5977, 'V11': -0.3253, 'V12': -0.2164,
-                'V13': 0.0842, 'V14': -1.0546, 'V15': 0.9679, 'V16': 0.6012,
-                'V17': 0.6311, 'V18': 0.2951, 'V19': -0.1362, 'V20': -0.0580,
-                'V21': -0.1703, 'V22': -0.4297, 'V23': -0.1413, 'V24': -0.2002,
-                'V25': 0.6395, 'V26': 0.3995, 'V27': -0.0343, 'V28': 0.0317,
-                'Amount': 0.76
-            }
+        if examples is None:
+            st.error("❌ Could not load example transactions. Using default examples.")
+            example_type = st.selectbox(
+                "Select Example:",
+                ["Normal Transaction", "Suspicious Transaction"]
+            )
+            
+            if example_type == "Normal Transaction":
+                # Default normal transaction
+                transaction = {
+                    'Time': 82450.0,
+                    'V1': 1.3145, 'V2': 0.5906, 'V3': -0.6666, 'V4': 0.7166,
+                    'V5': 0.3020, 'V6': -1.1255, 'V7': 0.3889, 'V8': -0.2884,
+                    'V9': -0.1321, 'V10': -0.5977, 'V11': -0.3253, 'V12': -0.2164,
+                    'V13': 0.0842, 'V14': -1.0546, 'V15': 0.9679, 'V16': 0.6012,
+                    'V17': 0.6311, 'V18': 0.2951, 'V19': -0.1362, 'V20': -0.0580,
+                    'V21': -0.1703, 'V22': -0.4297, 'V23': -0.1413, 'V24': -0.2002,
+                    'V25': 0.6395, 'V26': 0.3995, 'V27': -0.0343, 'V28': 0.0317,
+                    'Amount': 0.76
+                }
+            else:
+                # Default fraud transaction
+                transaction = {
+                    'Time': 28692.0,
+                    'V1': -29.2003, 'V2': 16.1557, 'V3': -30.0137, 'V4': 6.4767,
+                    'V5': -21.2258, 'V6': -4.9030, 'V7': -19.7912, 'V8': 19.1683,
+                    'V9': -3.6172, 'V10': -7.8701, 'V11': 4.0663, 'V12': -5.6615,
+                    'V13': 1.2930, 'V14': -5.0798, 'V15': -0.1265, 'V16': -5.2445,
+                    'V17': -11.2750, 'V18': -4.6784, 'V19': 0.6508, 'V20': 1.7159,
+                    'V21': 1.8094, 'V22': -2.1758, 'V23': -1.3651, 'V24': 0.1743,
+                    'V25': 2.1039, 'V26': -0.2099, 'V27': 1.2787, 'V28': 0.3724,
+                    'Amount': 99.99
+                }
         else:
-            # Real fraud transaction from dataset (Class=1, random_state=42)
-            # Note: V values are EXTREMELY large compared to normal (V1:-29, V3:-30, V7:-19)
-            transaction = {
-                'Time': 28692.0,
-                'V1': -29.2003, 'V2': 16.1557, 'V3': -30.0137, 'V4': 6.4767,
-                'V5': -21.2258, 'V6': -4.9030, 'V7': -19.7912, 'V8': 19.1683,
-                'V9': -3.6172, 'V10': -7.8701, 'V11': 4.0663, 'V12': -5.6615,
-                'V13': 1.2930, 'V14': -5.0798, 'V15': -0.1265, 'V16': -5.2445,
-                'V17': -11.2750, 'V18': -4.6784, 'V19': 0.6508, 'V20': 1.7159,
-                'V21': 1.8094, 'V22': -2.1758, 'V23': -1.3651, 'V24': 0.1743,
-                'V25': 2.1039, 'V26': -0.2099, 'V27': 1.2787, 'V28': 0.3724,
-                'Amount': 99.99
-            }
-        
-        st.success(f"✅ Loaded {example_type}")
+            # Load from JSON with multiple examples
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                transaction_type = st.selectbox(
+                    "Transaction Type:",
+                    ["Normal", "Fraud"]
+                )
+            
+            with col2:
+                if transaction_type == "Normal":
+                    example_options = [f"Normal #{i+1} (${ex['data']['Amount']:.2f})" 
+                                       for i, ex in enumerate(examples['normal_examples'])]
+                    selected_idx = st.selectbox("Select Example:", range(len(example_options)), 
+                                                 format_func=lambda x: example_options[x])
+                    selected_example = examples['normal_examples'][selected_idx]
+                else:
+                    example_options = [f"Fraud #{i+1} (${ex['data']['Amount']:.2f}, V1={ex['data']['V1']:.2f})" 
+                                       for i, ex in enumerate(examples['fraud_examples'])]
+                    selected_idx = st.selectbox("Select Example:", range(len(example_options)), 
+                                                 format_func=lambda x: example_options[x])
+                    selected_example = examples['fraud_examples'][selected_idx]
+            
+            transaction = selected_example['data']
+            
+            # Show transaction details
+            st.info(f"""
+            **Selected:** {transaction_type} #{selected_idx + 1}
+            - **Amount:** ${transaction['Amount']:.2f}
+            - **Key Features:** V1={transaction['V1']:.2f}, V3={transaction['V3']:.2f}, V7={transaction['V7']:.2f}
+            - **Pattern:** {'⚠️ Extreme values (likely fraud)' if abs(transaction['V1']) > 5 else '✅ Normal range'}
+            """)
         
     else:
         # Manual input
