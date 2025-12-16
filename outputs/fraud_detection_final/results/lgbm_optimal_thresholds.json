@@ -1,0 +1,10 @@
+{
+    "model": "LightGBM (Calibrated-Isotonic + Anomaly Score)",
+    "optimal_f2_threshold": 0.5999999999999998,
+    "optimal_youden_threshold": 0.0029163307368061464,
+    "optimal_cost_threshold": 0.23000000000000004,
+    "default_threshold": 0.5,
+    "test_samples": 56956,
+    "fraud_samples": 93,
+    "features": 31
+}

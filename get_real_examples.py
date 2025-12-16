@@ -13,16 +13,16 @@ print(f"Total transactions: {len(df)}")
 print(f"Fraud: {df['Class'].sum()} ({df['Class'].sum()/len(df)*100:.2f}%)")
 print(f"Normal: {(df['Class']==0).sum()} ({(df['Class']==0).sum()/len(df)*100:.2f}%)")
 
-# Get multiple examples (5 fraud + 5 normal)
+# Get multiple examples (10 fraud + 10 normal)
 print("\n" + "="*80)
-print("EXTRACTING 5 FRAUD + 5 NORMAL EXAMPLES")
+print("EXTRACTING 10 FRAUD + 10 NORMAL EXAMPLES")
 print("="*80)
 
 fraud_examples = []
 normal_examples = []
 
-# Get 5 fraud examples with different random states
-for i, seed in enumerate([42, 123, 456, 789, 999], 1):
+# Get 10 fraud examples with different random states
+for i, seed in enumerate([42, 123, 456, 789, 999, 1111, 2222, 3333, 4444, 5555], 1):
     fraud = df[df['Class']==1].sample(1, random_state=seed).iloc[0]
     fraud_dict = fraud.drop('Class').to_dict()
     fraud_examples.append({
@@ -47,7 +47,7 @@ print("="*80)
 for ex in fraud_examples:
     print(f"\n--- {ex['id'].upper()} (seed={ex['seed']}) ---")
     print(f"Amount: ${ex['data']['Amount']:.2f}")
-    print(f"V1={ex['data']['V1']:.2f}, V3={ex['data']['V3']:.2f}, V7={ex['data']['V7']:.2f}")
+    print(f"V14={ex['data']['V14']:.2f}, V4={ex['data']['V4']:.2f}, V12={ex['data']['V12']:.2f} (Top SHAP features)")
 
 print("\n" + "="*80)
 print("NORMAL EXAMPLES")
@@ -55,7 +55,7 @@ print("="*80)
 for ex in normal_examples:
     print(f"\n--- {ex['id'].upper()} (seed={ex['seed']}) ---")
     print(f"Amount: ${ex['data']['Amount']:.2f}")
-    print(f"V1={ex['data']['V1']:.2f}, V3={ex['data']['V3']:.2f}, V7={ex['data']['V7']:.2f}")
+    print(f"V14={ex['data']['V14']:.2f}, V4={ex['data']['V4']:.2f}, V12={ex['data']['V12']:.2f} (Top SHAP features)")
 
 
 # Detailed analysis: Compare V value ranges
@@ -110,7 +110,7 @@ with open('example_transactions.json', 'w') as f:
     json.dump(output_data, f, indent=2)
 
 print("\n" + "="*80)
-print("✅ Saved 10 examples to example_transactions.json")
+print(f"✅ Saved {len(fraud_examples)} fraud + {len(normal_examples)} normal = {len(fraud_examples) + len(normal_examples)} total examples to example_transactions.json")
 print("="*80)
 
 # Compare V value ranges

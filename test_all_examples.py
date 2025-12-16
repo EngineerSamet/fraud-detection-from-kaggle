@@ -35,7 +35,7 @@ for i, example in enumerate(examples['fraud_examples'], 1):
     
     print(f"\nFraud #{i}:")
     print(f"  Amount: ${transaction['Amount']:.2f}")
-    print(f"  V1={transaction['V1']:.2f}, V3={transaction['V3']:.2f}, V7={transaction['V7']:.2f}")
+    print(f"  Top SHAP: V14={transaction['V14']:.2f}, V4={transaction['V4']:.2f}, V12={transaction['V12']:.2f}")
     print(f"  → Probability: {prob:.2%}")
     print(f"  → Anomaly Score: {anomaly:.4f}")
     print(f"  → Decision: {'🚨 FRAUD' if decision else '✅ SAFE'}")
@@ -67,7 +67,7 @@ for i, example in enumerate(examples['normal_examples'], 1):
     
     print(f"\nNormal #{i}:")
     print(f"  Amount: ${transaction['Amount']:.2f}")
-    print(f"  V1={transaction['V1']:.2f}, V3={transaction['V3']:.2f}, V7={transaction['V7']:.2f}")
+    print(f"  Top SHAP: V14={transaction['V14']:.2f}, V4={transaction['V4']:.2f}, V12={transaction['V12']:.2f}")
     print(f"  → Probability: {prob:.2%}")
     print(f"  → Anomaly Score: {anomaly:.4f}")
     print(f"  → Decision: {'🚨 FRAUD' if decision else '✅ SAFE'}")
@@ -129,7 +129,8 @@ subtle_frauds = fraud_results[fraud_results['Probability'] < 0.80]
 if len(subtle_frauds) > 0:
     print(f"\n⚠️ SUBTLE FRAUDS ({len(subtle_frauds)} found):")
     for _, row in subtle_frauds.iterrows():
-        print(f"  {row['Example']}: {row['Probability']:.2%} - V1={row['V1']:.2f}")
+        # V1 yerine Amount göster (daha anlamlı subtle fraud için)
+        print(f"  {row['Example']}: {row['Probability']:.2%} - Amount=${row['Amount']:.2f}")
         print(f"    → {'Caught' if row['Decision'] else 'MISSED'} by F2-optimized threshold (0.60)")
 
 # Find strong frauds (high probability)
@@ -137,15 +138,15 @@ strong_frauds = fraud_results[fraud_results['Probability'] >= 0.90]
 if len(strong_frauds) > 0:
     print(f"\n🔥 OBVIOUS FRAUDS ({len(strong_frauds)} found):")
     for _, row in strong_frauds.iterrows():
-        print(f"  {row['Example']}: {row['Probability']:.2%} - V1={row['V1']:.2f}")
-        print(f"    → Extreme V values make this unmistakable")
+        print(f"  {row['Example']}: {row['Probability']:.2%} - Amount=${row['Amount']:.2f}")
+        print(f"    → Extreme feature values (V14, V4 interaction) make this unmistakable")
 
 # Check for false alarms
 false_alarms = normal_results[normal_results['Decision'] == True]
 if len(false_alarms) > 0:
     print(f"\n❌ FALSE ALARMS ({len(false_alarms)} found):")
     for _, row in false_alarms.iterrows():
-        print(f"  {row['Example']}: {row['Probability']:.2%} - V1={row['V1']:.2f}")
+        print(f"  {row['Example']}: {row['Probability']:.2%} - Amount=${row['Amount']:.2f}")
         print(f"    → Normal transaction incorrectly flagged as fraud")
 else:
     print("\n✅ NO FALSE ALARMS - Perfect precision on these examples!")
