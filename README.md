@@ -595,15 +595,6 @@ This project welcomes contributions! Areas for improvement:
 5. **Documentation:** Jupyter notebooks with step-by-step explanations
 
 ---
-
-## 📚 References
-
-**Academic Papers:**
-1. [XGBoost: A Scalable Tree Boosting System](https://arxiv.org/abs/1603.02754)
-2. [LightGBM: A Highly Efficient Gradient Boosting Decision Tree](https://papers.nips.cc/paper/6907-lightgbm-a-highly-efficient-gradient-boosting-decision-tree)
-3. [SHAP: A Unified Approach to Interpreting Model Predictions](https://arxiv.org/abs/1705.07874)
-4. [Learning from Imbalanced Data](https://www.sciencedirect.com/science/article/abs/pii/S0957417416307175)
-
 **Dataset:**
 - [Kaggle - Credit Card Fraud Detection](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud)
 
