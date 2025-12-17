@@ -131,9 +131,7 @@ def load_metrics():
 
 # Sidebar
 with st.sidebar:
-    st.image("https://img.icons8.com/color/96/000000/security-shield-green.png", width=100)
     st.title("🛡️ Fraud Detection")
-    
     page = st.radio(
         "Navigation",
         ["🏠 Home", "🔍 Single Prediction", "📊 Batch Prediction", "📈 Model Performance", "❓ FAQ"]
