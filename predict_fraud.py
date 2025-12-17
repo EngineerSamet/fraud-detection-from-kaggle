@@ -88,7 +88,7 @@ class FraudDetectionPipeline:
             (0.3, 0.5): 'MEDIUM',
             (0.5, 0.7): 'HIGH',
             (0.7, 0.9): 'VERY HIGH',
-            (0.9, 1.0): 'CRITICAL'
+            (0.9, 1.01): 'CRITICAL'  # Fixed: 1.01 to include 1.0
         }
     
     def load_models(self) -> bool:
@@ -221,7 +221,7 @@ class FraudDetectionPipeline:
         threshold_type : str
             Threshold type to use:
             - 'default': 0.5 (standard)
-            - 'f2_optimized': 0.18 (optimized for F2-score)
+            - 'f2_optimized': 0.60 (optimized for F2-score)
             - 'cost_50': 0.13 (FN cost = 50x FP cost)
             - 'cost_100': 0.07 (FN cost = 100x FP cost) [RECOMMENDED]
             - 'cost_200': 0.07

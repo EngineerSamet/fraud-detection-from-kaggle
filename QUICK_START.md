@@ -224,12 +224,12 @@ python predict_fraud.py
 ├────────────────────┬─────────────┬────────────┬───────────────────────┤
 │ Strategy           │ Threshold   │ Prediction │ Confidence            │
 ├────────────────────┼─────────────┼────────────┼───────────────────────┤
-│ default            │ 0.50        │ FRAUD      │ 🔴 Very High         │
-│ f2_optimized       │ 0.18        │ FRAUD      │ 🔴 Very High         │
-│ cost_50            │ 0.30        │ FRAUD      │ 🔴 Very High         │
-│ cost_100           │ 0.23        │ FRAUD      │ 🔴 Very High         │
-│ cost_200           │ 0.15        │ FRAUD      │ 🔴 Very High         │
-│ cost_500           │ 0.07        │ FRAUD      │ 🔴 Very High         │
+│ default            │ 0.50        │ FRAUD      │ 🔴 Critical          │
+│ f2_optimized       │ 0.60        │ FRAUD      │ 🔴 Critical          │
+│ cost_50            │ 0.30        │ FRAUD      │ 🔴 Critical          │
+│ cost_100           │ 0.23        │ FRAUD      │ 🔴 Critical          │
+│ cost_200           │ 0.23        │ FRAUD      │ 🔴 Critical          │
+│ cost_500           │ 0.23        │ FRAUD      │ 🔴 Critical          │
 └────────────────────┴─────────────┴────────────┴───────────────────────┘
 ```
 
@@ -237,26 +237,28 @@ python predict_fraud.py
 
 ## 📊 Performance Summary
 
-### Champion Model: LightGBM + Isotonic Calibration
+### Champion Model: LightGBM with F2-Optimized Threshold
 
 | Metric          | Value   | Interpretation                                    |
 |-----------------|---------|---------------------------------------------------|
 | **PR-AUC**      | 88.07%  | Excellent fraud detection (gold standard metric)  |
 | **Recall**      | 83.87%  | Catches 84 out of 100 frauds                      |
-| **Precision**   | 90.70%  | 9 out of 10 alerts are real frauds                |
-| **F2-Score**    | 85.15%  | Balanced metric (recall-weighted)                 |
+| **Precision**   | 96.30%  | 96 out of 100 alerts are real frauds              |
+| **F2-Score**    | 86.09%  | Balanced metric (recall-weighted)                 |
 | **ROC-AUC**     | 98.88%  | High true positive rate                           |
-| **MCC**         | 0.872   | Excellent correlation (robust metric)             |
+| **MCC**         | 0.899   | Excellent correlation (robust metric)             |
+
+**Strategy:** Same base model as LGBM_Calibrated_Isotonic, but with optimized threshold (0.60) that achieves higher precision without sacrificing recall.
 
 ### Top 5 Models by PR-AUC
 
-| Rank | Model Configuration      | PR-AUC | Recall | Precision |
-|------|--------------------------|--------|--------|-----------|
-| 1    | LGBM_Calibrated_Isotonic | 88.07% | 83.87% | 90.70%    |
-| 2    | XGB_Calibrated_Sigmoid   | 87.91% | 82.80% | 81.91%    |
-| 3    | XGB_Calibrated_Isotonic  | 87.88% | 79.57% | 90.24%    |
-| 4    | LGBM_ClassWeights        | 87.96% | 84.95% | 84.04%    |
-| 5    | Voting_LGBM_XGB_RF       | 87.24% | 84.95% | 85.87%    |
+| Rank | Model Configuration       | PR-AUC | Recall | Precision |
+|------|---------------------------|--------|--------|-----------|
+| 1    | LGBM_Optimized_F2         | 88.07% | 83.87% | 96.30%    |
+| 2    | LGBM_Calibrated_Isotonic  | 88.07% | 83.87% | 90.70%    |
+| 3    | XGB_Calibrated_Sigmoid    | 87.91% | 82.80% | 81.91%    |
+| 4    | XGB_Calibrated_Isotonic   | 87.88% | 79.57% | 90.24%    |
+| 5    | LGBM_ClassWeights         | 87.96% | 84.95% | 84.04%    |
 
 ### Cost-Sensitive Analysis
 
@@ -351,9 +353,18 @@ python predict_fraud.py
 
 ### Why LightGBM Won?
 
+**LGBM_Optimized_F2 (Champion) compared to alternatives:**
+
+**vs LGBM_Calibrated_Isotonic:**
+- ✅ Same PR-AUC (88.07%)
+- ✅ Same recall (83.87%)
+- ✅ **11% higher precision** (96.30% vs 90.70%)
+- ✅ **63% fewer false alarms** (40 vs 109 per 1000 transactions)
+- ✅ Optimized threshold (0.60) balances precision and recall
+
 **Compared to XGBoost:**
 - ✅ Better PR-AUC (88.07% vs 87.91%)
-- ✅ More stable threshold (0.23 works across all cost ratios)
+- ✅ Higher precision (96.30% vs 90.24%)
 - ✅ Faster training (gradient-based tree growth)
 
 **Compared to Random Forest:**

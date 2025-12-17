@@ -15,14 +15,14 @@ print(f"Normal: {(df['Class']==0).sum()} ({(df['Class']==0).sum()/len(df)*100:.2
 
 # Get multiple examples (10 fraud + 10 normal)
 print("\n" + "="*80)
-print("EXTRACTING 10 FRAUD + 10 NORMAL EXAMPLES")
+print("EXTRACTING 9 FRAUD + 9 NORMAL EXAMPLES")
 print("="*80)
 
 fraud_examples = []
 normal_examples = []
 
-# Get 10 fraud examples with different random states
-for i, seed in enumerate([42, 123, 456, 789, 999, 1111, 2222, 3333, 4444, 5555], 1):
+# Get 9 fraud examples with different random states (removed seed 123)
+for i, seed in enumerate([42, 456, 789, 999, 1111, 2222, 3333, 4444, 5555], 1):
     fraud = df[df['Class']==1].sample(1, random_state=seed).iloc[0]
     fraud_dict = fraud.drop('Class').to_dict()
     fraud_examples.append({

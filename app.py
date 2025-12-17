@@ -180,8 +180,8 @@ if page == "🏠 Home":
     
     Our champion model combines calibrated LightGBM with threshold optimization:
     - **Base Model**: LightGBM with Isotonic Calibration (reliable probabilities)
-    - **Optimization**: F2-optimized threshold (0.18) maximizes fraud detection
-    - **Result**: 96% precision with 84% recall - catching frauds while minimizing false alarms
+    - **Optimization**: F2-optimized threshold (0.60) maximizes fraud detection
+    - **Result**: 96.3% precision with 83.9% recall - catching frauds while minimizing false alarms
     """)
     
     col1, col2, col3, col4 = st.columns(4)
@@ -645,7 +645,7 @@ elif page == "📈 Model Performance":
     
     # Champion model
     st.markdown("### 🏆 Champion Model: LightGBM with F2-Optimized Threshold")
-    st.caption("*Same base model as LGBM_Calibrated_Isotonic, but with optimized threshold (0.18) that achieves higher precision without sacrificing recall*")
+    st.caption("*Same base model as LGBM_Calibrated_Isotonic, but with optimized threshold (0.60) that achieves higher precision without sacrificing recall*")
     
     champion_metrics = metrics['LGBM_Optimized_F2']
     
