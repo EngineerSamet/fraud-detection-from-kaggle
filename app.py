@@ -318,8 +318,8 @@ elif page == "🔍 Single Prediction":
             st.info(f"""
             **Selected:** {transaction_type} #{selected_idx + 1}
             - **Amount:** ${transaction['Amount']:.2f}
-            - **Top SHAP Features:** V14={transaction['V14']:.2f}, V4={transaction['V4']:.2f}, V12={transaction['V12']:.2f}
-            - **Pattern:** {'⚠️ High fraud risk (V14 < -3 or V4 > 3)' if transaction['V14'] < -3 or transaction['V4'] > 3 else '✅ Normal range'}
+            - **Top Fraud Indicators (SHAP):** V14={transaction['V14']:.2f}, V10={transaction['V10']:.2f}, V3={transaction['V3']:.2f}
+            - **Pattern:** {'⚠️ High fraud risk (V14 < -3, V10 < -2, or V3 < -2)' if transaction['V14'] < -3 or transaction['V10'] < -2 or transaction['V3'] < -2 else '✅ Normal range'}
             """)
         
     else:

@@ -166,16 +166,18 @@ All features (V1-V28) are anonymized PCA components. This limits:
 
 ### Phase 6: Model Interpretability (SHAP Analysis)
 
-**Global Feature Importance (All Samples):**
-1. V14 - Top fraud indicator (mean |SHAP| = 1.616)
-2. V4 - Second most important (mean |SHAP| = 1.040)
-3. Anomaly Score - Third (mean |SHAP| = 0.878)
+**Fraud-Only SHAP Analysis** (Primary - Banking Standard):
+1. **V14** - Primary fraud indicator (32.7% more important for frauds)
+2. **V10** - Secondary fraud pattern detector
+3. **V3** - Tertiary fraud signal
+4. **V12** - Transaction structure anomaly
+5. **V4** - Supporting feature (46.6% more important for frauds)
 
-**Fraud-Only SHAP Analysis** (Banking Standard):
-- Analyzed 200 fraud samples specifically
-- V14 importance increased 32.7% for fraud cases
-- V4 importance increased 46.6% for fraud cases
-- **Insight:** These features are MORE critical when detecting fraud vs general predictions
+**Global Feature Importance (All Samples - Reference):**
+- V4 ranked #1 overall (strong discriminator between classes)
+- V14 ranked #2 overall
+- Anomaly Score ranked #3 overall
+- **Insight:** Fraud-specific ranking differs from general importance - we prioritize fraud-only SHAP for detection
 
 **Feature Interactions:**
 - V14 × V17 - Strong interaction effect
@@ -388,12 +390,17 @@ python predict_fraud.py
 - **Cost Reduction:** 22.81% (saves $304 - best for high-risk scenarios)
 
 ### Feature Importance (SHAP)
-**Top 5 Features (Fraud-Only Analysis):**
-1. **V14** - 32.7% more important for fraud detection
-2. **V4** - 46.6% more important for fraud detection
-3. **Anomaly Score** - 25.6% more important for fraud
-4. **V12** - Strong fraud indicator
-5. **V10** - Consistent across models
+**Top 5 Features (Fraud-Only SHAP Analysis):**
+1. **V14** - Primary fraud indicator (highest importance in fraud cases)
+2. **V10** - Secondary fraud pattern (strong fraud signal)
+3. **V3** - Tertiary fraud detector (critical for fraud identification)
+4. **V12** - Transaction structure anomaly (consistent fraud indicator)
+5. **V4** - Supporting feature (46.6% more important for frauds)
+
+**Note:** We use **Fraud-Only SHAP** ranking (not general SHAP) because:
+- Our goal is fraud detection, not general classification
+- Features behave differently for fraud vs normal transactions
+- V14, V10, V3 are strongest fraud-specific signals
 
 **Insight:** Fraud transactions have distinctly different feature patterns compared to normal transactions.
 

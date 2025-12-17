@@ -35,7 +35,7 @@ for i, example in enumerate(examples['fraud_examples'], 1):
     
     print(f"\nFraud #{i}:")
     print(f"  Amount: ${transaction['Amount']:.2f}")
-    print(f"  Top SHAP: V14={transaction['V14']:.2f}, V4={transaction['V4']:.2f}, V12={transaction['V12']:.2f}")
+    print(f"  Top Fraud Indicators: V14={transaction['V14']:.2f}, V10={transaction['V10']:.2f}, V3={transaction['V3']:.2f}")
     print(f"  → Probability: {prob:.2%}")
     print(f"  → Anomaly Score: {anomaly:.4f}")
     print(f"  → Decision: {'🚨 FRAUD' if decision else '✅ SAFE'}")
@@ -67,11 +67,11 @@ for i, example in enumerate(examples['normal_examples'], 1):
     
     print(f"\nNormal #{i}:")
     print(f"  Amount: ${transaction['Amount']:.2f}")
-    print(f"  Top SHAP: V14={transaction['V14']:.2f}, V4={transaction['V4']:.2f}, V12={transaction['V12']:.2f}")
+    print(f"  Top Fraud Indicators: V14={transaction['V14']:.2f}, V10={transaction['V10']:.2f}, V3={transaction['V3']:.2f}")
     print(f"  → Probability: {prob:.2%}")
     print(f"  → Anomaly Score: {anomaly:.4f}")
     print(f"  → Decision: {'🚨 FRAUD' if decision else '✅ SAFE'}")
-    print(f"  → Status: {'✅ CORRECT' if not decision else '❌ FALSE ALARM (False Positive)'}")
+    print(f"  → Status: {'✅ CORRECT' if not decision else '❌ FALSE ALARM'}")
     
     results.append({
         'Type': 'Normal',
@@ -139,7 +139,7 @@ if len(strong_frauds) > 0:
     print(f"\n🔥 OBVIOUS FRAUDS ({len(strong_frauds)} found):")
     for _, row in strong_frauds.iterrows():
         print(f"  {row['Example']}: {row['Probability']:.2%} - Amount=${row['Amount']:.2f}")
-        print(f"    → Extreme feature values (V14, V4 interaction) make this unmistakable")
+        print(f"    → Extreme feature values (V14, V10, V3 interaction) make this unmistakable")
 
 # Check for false alarms
 false_alarms = normal_results[normal_results['Decision'] == True]

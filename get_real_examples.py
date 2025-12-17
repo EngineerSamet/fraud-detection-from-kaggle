@@ -47,7 +47,7 @@ print("="*80)
 for ex in fraud_examples:
     print(f"\n--- {ex['id'].upper()} (seed={ex['seed']}) ---")
     print(f"Amount: ${ex['data']['Amount']:.2f}")
-    print(f"V14={ex['data']['V14']:.2f}, V4={ex['data']['V4']:.2f}, V12={ex['data']['V12']:.2f} (Top SHAP features)")
+    print(f"V14={ex['data']['V14']:.2f}, V10={ex['data']['V10']:.2f}, V3={ex['data']['V3']:.2f} (Top Fraud Indicators - SHAP)")
 
 print("\n" + "="*80)
 print("NORMAL EXAMPLES")
@@ -55,7 +55,7 @@ print("="*80)
 for ex in normal_examples:
     print(f"\n--- {ex['id'].upper()} (seed={ex['seed']}) ---")
     print(f"Amount: ${ex['data']['Amount']:.2f}")
-    print(f"V14={ex['data']['V14']:.2f}, V4={ex['data']['V4']:.2f}, V12={ex['data']['V12']:.2f} (Top SHAP features)")
+    print(f"V14={ex['data']['V14']:.2f}, V10={ex['data']['V10']:.2f}, V3={ex['data']['V3']:.2f} (Top Fraud Indicators - SHAP)")
 
 
 # Detailed analysis: Compare V value ranges
