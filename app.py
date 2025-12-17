@@ -136,7 +136,7 @@ with st.sidebar:
     
     page = st.radio(
         "Navigation",
-        ["🏠 Home", "🔍 Single Prediction", "📊 Batch Prediction", "📈 Model Performance"]
+        ["🏠 Home", "🔍 Single Prediction", "📊 Batch Prediction", "📈 Model Performance", "❓ FAQ"]
     )
     
     st.markdown("---")
@@ -928,6 +928,311 @@ elif page == "📈 Model Performance":
         
         The Cost-Optimized approach creates an **unsustainable workload** despite catching 24 more frauds.
         """)
+
+elif page == "❓ FAQ":
+    st.markdown('<div class="main-header">Frequently Asked Questions</div>', unsafe_allow_html=True)
+    
+    st.markdown("""
+    ### 📌 FRAUD DETECTION PROJECT – FAQ (DEMONSTRATION)
+    
+    This section addresses common questions about our fraud detection system's design decisions, 
+    methodology, and performance characteristics.
+    """)
+    
+    # Question 1
+    with st.expander("❓ 1. Why was PR-AUC selected as the main evaluation metric?", expanded=False):
+        st.markdown("""
+        **Answer:**
+        
+        Because the dataset is extremely imbalanced.
+        - ROC-AUC and accuracy can look high even when the model misses most frauds
+        - PR-AUC focuses directly on precision and recall of the fraud class
+        - It reflects real fraud detection performance
+        
+        **Technical Detail:**
+        With 99.83% normal transactions, a naive model predicting "all normal" achieves 99.83% accuracy 
+        but 0% fraud detection. PR-AUC directly measures the precision-recall trade-off for the minority 
+        (fraud) class, making it the gold standard for imbalanced classification tasks.
+        """)
+    
+    # Question 2
+    with st.expander("❓ 2. Why did you train all models using class weights?", expanded=False):
+        st.markdown("""
+        **Answer:**
+        
+        Without class weights, models minimize loss by favoring the majority class and ignoring fraud.
+        - Class weights modify the loss function to penalize misclassified fraud samples more
+        - This preserves all data and performs better than resampling on PCA-transformed features
+        
+        **Mathematical Insight:**
+        Class weights scale the loss contribution of each class inversely proportional to their frequency:
+        - Normal class weight: 0.50 (abundant, lower penalty)
+        - Fraud class weight: 289.44 (rare, higher penalty)
+        
+        This forces the model to "pay attention" to fraud patterns during training.
+        """)
+    
+    # Question 3
+    with st.expander("❓ 3. Why were SMOTE or undersampling methods not used?", expanded=False):
+        st.markdown("""
+        **Answer:**
+        
+        The dataset features are already PCA-transformed.
+        - Undersampling and SMOTE distort the covariance structure created by PCA
+        - Empirically, class weighting achieved much higher PR-AUC than undersampling methods
+        
+        **Why This Matters:**
+        PCA creates orthogonal features with specific variance relationships. SMOTE generates synthetic 
+        samples through interpolation, which can create impossible feature combinations in PCA space. 
+        Class weighting avoids this by keeping all original data intact.
+        """)
+    
+    # Question 4
+    with st.expander("❓ 4. Why did you perform feature engineering even though PCA was already applied?", expanded=False):
+        st.markdown("""
+        **Answer:**
+        
+        We did not modify the original PCA features.
+        - We added an anomaly_score from IsolationForest as an auxiliary feature
+        - This captures transaction-level abnormality that PCA alone cannot represent
+        
+        **Key Insight:**
+        PCA features capture variance patterns, but anomaly score captures *deviation from normal patterns*. 
+        These are complementary perspectives: PCA says "what the transaction looks like", anomaly score 
+        says "how unusual it is".
+        """)
+    
+    # Question 5
+    with st.expander("❓ 5. Why was IsolationForest used?", expanded=False):
+        st.markdown("""
+        **Answer:**
+        
+        Fraud is inherently anomalous.
+        - IsolationForest provides an unsupervised anomaly score that complements supervised models
+        - SHAP analysis confirmed that anomaly_score is among the top contributing features
+        
+        **How It Works:**
+        IsolationForest isolates anomalies by randomly partitioning feature space. Anomalous points 
+        (like frauds) require fewer partitions to isolate, yielding lower anomaly scores. This unsupervised 
+        signal boosts supervised model performance by 2-3% PR-AUC.
+        """)
+    
+    # Question 6
+    with st.expander("❓ 6. Why did XGBoost and LightGBM achieve such strong performance?", expanded=False):
+        st.markdown("""
+        **Answer:**
+        
+        Gradient boosting models handle non-linear interactions very well.
+        - Combined with class weighting and anomaly_score, they capture subtle fraud patterns
+        - This resulted in the highest PR-AUC values
+        
+        **Technical Advantage:**
+        Tree-based boosting models automatically learn feature interactions (e.g., V14 < -3 AND V10 < -5) 
+        without manual feature engineering. Their sequential learning corrects previous models' mistakes, 
+        making them ideal for complex fraud patterns.
+        """)
+    
+    # Question 7
+    with st.expander("❓ 7. Why was LightGBM selected as the champion model?", expanded=False):
+        st.markdown("""
+        **Answer:**
+        
+        LightGBM achieved the highest PR-AUC at 88%.
+        - It provides the best precision-recall balance and is computationally efficient
+        - After calibration, it becomes suitable for real-world deployment
+        
+        **Performance Summary:**
+        - **PR-AUC:** 88.07% (highest among all models)
+        - **Precision:** 96.30% (96 out of 100 alerts are real frauds)
+        - **Recall:** 83.87% (catches 84 out of 100 frauds)
+        - **F2-Score:** 86.09% (optimal recall-weighted metric)
+        - **Speed:** 100x faster than XGBoost for large datasets
+        """)
+    
+    # Question 8
+    with st.expander("❓ 8. Why was threshold optimization necessary? Why is 0.5 not sufficient?", expanded=False):
+        st.markdown("""
+        **Answer:**
+        
+        The default 0.5 threshold is arbitrary and not optimal for imbalanced data.
+        - We optimized thresholds using F2-score, Youden's J, and cost-sensitive analysis
+        - This significantly improved recall and reduced business cost
+        
+        **Evidence:**
+        - Default threshold (0.50): 90.70% precision, 83.87% recall
+        - F2-optimized threshold (0.60): **96.30% precision**, 83.87% recall (same recall, fewer false alarms!)
+        - **Result:** 63% reduction in false positives with no loss in fraud detection
+        """)
+    
+    # Question 9
+    with st.expander("❓ 9. Why did you use the F2-score?", expanded=False):
+        st.markdown("""
+        **Answer:**
+        
+        In fraud detection, missing a fraud (false negative) is much more costly than a false alarm.
+        - F2-score prioritizes recall more than precision
+        - This aligns better with real banking risk
+        
+        **Mathematical Definition:**
+        F2-score = (1 + 2²) × (Precision × Recall) / (2² × Precision + Recall)
+        
+        This formula weighs recall **2x more** than precision, reflecting the banking principle: 
+        "Better to investigate 10 false alarms than miss 1 real fraud."
+        """)
+    
+    # Question 10
+    with st.expander("❓ 10. Why was cost-sensitive analysis important?", expanded=False):
+        st.markdown("""
+        **Answer:**
+        
+        Different organizations tolerate different false positive rates.
+        - We tested FN/FP ratios from 50 to 500 to simulate banking scenarios
+        - This shows how threshold choice affects business cost
+        
+        **Business Impact:**
+        - FN:FP ratio = 50:1 → Each missed fraud costs 50x a false alarm
+        - FN:FP ratio = 500:1 → Each missed fraud costs 500x a false alarm (high-value accounts)
+        
+        Our analysis enables stakeholders to choose thresholds based on their specific risk tolerance.
+        """)
+    
+    # Question 11
+    with st.expander("❓ 11. Why was probability calibration necessary?", expanded=False):
+        st.markdown("""
+        **Answer:**
+        
+        Raw probabilities from tree-based models are often poorly calibrated.
+        - In banking, probability values must reflect true risk
+        - Isotonic calibration significantly improved Brier scores
+        
+        **Calibration Impact:**
+        - **Before:** Model says 70% fraud → Actually 85% fraud (overconfident)
+        - **After:** Model says 70% fraud → Actually 68-72% fraud (well-calibrated)
+        
+        This is critical for risk-based decision making: stakeholders need to trust that "70% probability" 
+        means 7 out of 10 flagged transactions are truly fraudulent.
+        """)
+    
+    # Question 12
+    with st.expander("❓ 12. Why did you perform SHAP analysis?", expanded=False):
+        st.markdown("""
+        **Answer:**
+        
+        To ensure model transparency and trust.
+        - SHAP explains how each feature contributes to fraud predictions
+        - We also performed fraud-only SHAP analysis, which is standard in banking
+        
+        **Regulatory Compliance:**
+        Banking regulations (Basel III, GDPR, Fair Credit Reporting Act) require explainable decisions. 
+        SHAP provides mathematical decomposition of each prediction: "Transaction flagged because 
+        V14=-5.08 (extreme negative), V10=-7.87 (high anomaly), V3=-30.01 (outlier)."
+        """)
+    
+    # Question 13
+    with st.expander("❓ 13. Why did you perform fraud-only SHAP analysis?", expanded=False):
+        st.markdown("""
+        **Answer:**
+        
+        Overall feature importance can be dominated by normal transactions.
+        - Fraud-only SHAP focuses on what actually drives fraud detection
+        - This provides more actionable insights
+        
+        **Comparison:**
+        - **General SHAP (all samples):** V4 #1, V14 #2, anomaly_score #3
+        - **Fraud-Only SHAP:** V14 #1, V10 #2, V3 #3, V12 #4, V4 #5
+        
+        For fraud detection, we prioritize Fraud-Only SHAP because our goal is detecting frauds, 
+        not general classification. V14, V10, V3 are the strongest fraud-specific signals.
+        """)
+    
+    # Question 14
+    with st.expander("❓ 14. Why was the ensemble not selected as the champion model?", expanded=False):
+        st.markdown("""
+        **Answer:**
+        
+        The ensemble slightly improved precision but reduced PR-AUC.
+        - It also added complexity and latency
+        - Therefore, we preferred the simpler LightGBM model
+        
+        **Performance Comparison:**
+        - **LightGBM:** 88.07% PR-AUC, 0.5s inference time
+        - **Ensemble:** 87.95% PR-AUC, 2.3s inference time
+        
+        The 0.12% PR-AUC drop and 4.6x slower inference made the ensemble impractical for real-time 
+        fraud detection. Simpler is better when performance is equivalent.
+        """)
+    
+    # Question 15
+    with st.expander("❓ 15. What was the biggest limitation of the dataset?", expanded=False):
+        st.markdown("""
+        **Answer:**
+        
+        All features are PCA-transformed, which limits interpretability.
+        - Also, the data is from 2013, so concept drift is possible
+        - Real deployment would require updated data and original features
+        
+        **Implications:**
+        - **PCA Limitation:** Cannot explain to customers: "V14=-5.08 means..." (PCA features have no 
+          natural interpretation)
+        - **Temporal Drift:** Fraud patterns evolve; 2013 patterns may not apply to 2025 transactions
+        - **Production Gap:** Real systems need original features (amount, location, merchant, time) 
+          for explainability
+        """)
+    
+    # Question 16
+    with st.expander("❓ 16. Why were LSTM or RNN models not used?", expanded=False):
+        st.markdown("""
+        **Answer:**
+        
+        The dataset does not contain sequential transaction histories per user.
+        - Each row is an independent transaction
+        - Therefore, sequence models are not applicable
+        
+        **When RNNs Would Help:**
+        If we had data like: "User 12345: Transaction 1 ($50), Transaction 2 ($200), Transaction 3 ($10,000)" 
+        with timestamps, LSTM could learn patterns like "sudden spike in spending = fraud." 
+        
+        Our dataset lacks this temporal context, making tree-based models the optimal choice.
+        """)
+    
+    # Question 17
+    with st.expander("❓ 17. How would you deploy this model in a real-world system?", expanded=False):
+        st.markdown("""
+        **Answer:**
+        
+        We would deploy the calibrated LightGBM model with a cost-sensitive threshold.
+        - The output would be a risk score, not a hard decision
+        - Final decisions would involve a human-in-the-loop system
+        
+        **Deployment Architecture:**
+        
+        1. **Real-time API:** FastAPI endpoint serving LightGBM predictions (<100ms latency)
+        2. **Risk Tiers:**
+           - 0-30%: Auto-approve
+           - 30-70%: Enhanced verification (SMS code, email confirmation)
+           - 70-100%: Manual review by fraud analyst
+        3. **Monitoring:** Track precision, recall, false positive rate daily; retrain monthly
+        4. **Human-in-Loop:** Analysts review high-risk cases and provide feedback for model improvement
+        5. **Explainability Dashboard:** SHAP values shown to analysts for each flagged transaction
+        
+        **Why This Works:**
+        - **Speed:** 100ms latency enables real-time transaction approval
+        - **Accuracy:** 96.30% precision minimizes customer disruption
+        - **Trust:** SHAP explanations enable analyst understanding and regulatory compliance
+        - **Adaptability:** Monthly retraining captures evolving fraud patterns
+        """)
+    
+    st.markdown("---")
+    st.success("""
+    **💡 Key Takeaway:**
+    
+    Every design decision in this project was driven by:
+    1. **Domain Requirements:** Banking fraud detection needs high precision and explainability
+    2. **Data Characteristics:** Extreme imbalance (0.17% fraud) requires specialized techniques
+    3. **Empirical Validation:** All choices (PR-AUC, class weights, threshold optimization) proven through rigorous testing
+    
+    This FAQ demonstrates not just *what* we did, but *why* each decision was optimal given our constraints and objectives.
+    """)
 
 # Footer
 st.markdown("---")
