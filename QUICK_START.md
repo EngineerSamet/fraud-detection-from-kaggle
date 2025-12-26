@@ -36,12 +36,14 @@ pip install -r requirements.txt
 ```
 
 **Dependencies installed:**
-- `numpy`, `pandas` - Data manipulation
+- `numpy`, `pandas`, `scipy` - Core data science libraries
 - `scikit-learn` - Base ML framework
 - `xgboost`, `lightgbm` - Gradient boosting models
 - `imbalanced-learn` - Imbalance handling (EasyEnsemble, BalancedBagging)
 - `matplotlib`, `seaborn` - Visualization
 - `shap` - Model interpretability
+- `streamlit`, `plotly` - Web application & interactive charts
+- `tqdm` - Progress bars
 
 **Installation time:** ~2-3 minutes
 

@@ -332,15 +332,30 @@ pip install -r requirements.txt
 
 **Required packages:**
 ```
-numpy>=1.24.0
-pandas>=2.0.0
-scikit-learn>=1.3.0
-xgboost>=2.0.0
-lightgbm>=4.0.0
-imbalanced-learn>=0.11.0
-matplotlib>=3.7.0
-seaborn>=0.12.0
-shap>=0.42.0
+# Core Data Science Libraries
+numpy>=1.21.0
+pandas>=1.3.0
+scipy>=1.7.0
+
+# Machine Learning
+scikit-learn>=1.0.0
+xgboost>=1.5.0
+lightgbm>=3.3.0
+imbalanced-learn>=0.9.0
+
+# Model Interpretability
+shap>=0.41.0
+
+# Visualization
+matplotlib>=3.4.0
+seaborn>=0.11.0
+
+# Web Application (Streamlit Demo)
+streamlit>=1.28.0
+plotly>=5.14.0
+
+# Progress Bars
+tqdm>=4.62.0
 ```
 
 ### 2. Download Dataset
