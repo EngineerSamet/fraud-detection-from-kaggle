@@ -497,6 +497,17 @@ python test_all_examples.py
 
 **Insight:** Fraud transactions have distinctly different feature patterns compared to normal transactions.
 
+### Training Process Analysis
+
+**Note on Training Curves:** Tree-based models (LightGBM, XGBoost, Random Forest) do not optimize via epochs; therefore training dynamics are analyzed via PR curves, calibration plots, and threshold sensitivity instead of loss-vs-epoch plots. The project provides:
+- **48 visualizations** (41 main figures + 7 SHAP plots) showing model performance
+- **Calibration curves** demonstrating probability prediction accuracy
+- **PR/ROC curves** for performance comparison across models
+- **Threshold analysis plots** showing cost-sensitivity trade-offs
+- **SHAP feature importance** for model interpretability
+
+These visualizations are located in `outputs/fraud_detection_final/figures/` and provide comprehensive insight into model behavior and decision-making processes.
+
 ---
 
 ## 🔬 Technical Deep Dive
