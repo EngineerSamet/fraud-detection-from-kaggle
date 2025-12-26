@@ -45,7 +45,7 @@ pip install -r requirements.txt
 
 **Installation time:** ~2-3 minutes
 
-### Step 3: Download Dataset
+### Step 3: Download Dataset ⚠️ **REQUIRED BEFORE TRAINING**
 
 1. Visit: https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
 2. Click **Download** (143 MB)
@@ -57,11 +57,13 @@ pip install -r requirements.txt
 ML Project/
 ├── data/
 │   └── raw/
-│       └── creditcard.csv  ← PUT FILE HERE
+│       └── creditcard.csv  ← PUT FILE HERE (MANDATORY)
 ├── main.py
 ├── predict_fraud.py
 └── requirements.txt
 ```
+
+**⚠️ IMPORTANT:** You MUST download the dataset before running `python main.py`. The training pipeline will fail if `creditcard.csv` is missing.
 
 ---
 
@@ -116,7 +118,7 @@ python main.py
 [Phase 8] Results Saving                         (10 sec)
   ✅ Save models to outputs/fraud_detection_final/models/
   ✅ Save results to outputs/fraud_detection_final/results/
-  ✅ Generate 38 visualizations
+  ✅ Generate 48 visualizations (41 main figures + 7 SHAP plots)
 ```
 
 **Total Runtime:** ~12-15 minutes on modern CPU (Intel i5/i7, AMD Ryzen 5/7)

@@ -362,7 +362,7 @@ python main.py
 4. Cross-validation & calibration
 5. Threshold optimization (F2, cost-sensitive)
 6. SHAP analysis (global + fraud-only)
-7. Model & results saving
+7. Model & results saving (48 visualizations: 41 main figures + 7 SHAP plots)
 8. Final comparison & reporting
 
 **Runtime:** ~12-15 minutes on modern CPU
