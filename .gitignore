@@ -37,8 +37,5 @@ wheels/
 *.swo
 *~
 
-# Model artifacts
-*.pickle
-*.pkl
 
 data/raw/
