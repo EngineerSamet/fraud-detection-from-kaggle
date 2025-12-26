@@ -242,45 +242,48 @@ python predict_fraud.py
 | Metric          | Value   | Interpretation                                    |
 |-----------------|---------|---------------------------------------------------|
 | **PR-AUC**      | 88.07%  | Excellent fraud detection (gold standard metric)  |
-| **Recall**      | 83.87%  | Catches 84 out of 100 frauds                      |
+| **Recall**      | 83.87%  | Catches 78 out of 93 frauds in test set          |
 | **Precision**   | 96.30%  | 96 out of 100 alerts are real frauds              |
 | **F2-Score**    | 86.09%  | Balanced metric (recall-weighted)                 |
 | **ROC-AUC**     | 98.88%  | High true positive rate                           |
 | **MCC**         | 0.899   | Excellent correlation (robust metric)             |
 
-**Strategy:** Same base model as LGBM_Calibrated_Isotonic, but with optimized threshold (0.60) that achieves higher precision without sacrificing recall.
+**Why This is the Champion:**
+- Same base model as LGBM_Calibrated_Isotonic (88.07% PR-AUC)
+- **F2-optimized threshold (0.60)** achieves **5.6% higher precision** (96.30% vs 90.70%)
+- **62.5% fewer false positives** (3 vs 8 per 56,956 transactions)
+- Same PR-AUC and recall → More practical for production deployment
+- **Only 3 false alarms** out of 56,863 legitimate transactions
 
 ### Top 5 Models by PR-AUC
 
-| Rank | Model Configuration       | PR-AUC | Recall | Precision |
-|------|---------------------------|--------|--------|-----------|
-| 1    | LGBM_Optimized_F2         | 88.07% | 83.87% | 96.30%    |
-| 2    | LGBM_Calibrated_Isotonic  | 88.07% | 83.87% | 90.70%    |
-| 3    | XGB_Calibrated_Sigmoid    | 87.91% | 82.80% | 81.91%    |
-| 4    | XGB_Calibrated_Isotonic   | 87.88% | 79.57% | 90.24%    |
-| 5    | LGBM_ClassWeights         | 87.96% | 84.95% | 84.04%    |
+| Rank | Model Configuration       | PR-AUC | Recall | Precision | False Positives |
+|------|---------------------------|--------|--------|-----------|----------------:|
+| 1    | LGBM_Optimized_F2 🏆     | 88.07% | 83.87% | 96.30%    | 3               |
+| 2    | LGBM_Calibrated_Isotonic  | 88.07% | 83.87% | 90.70%    | 8               |
+| 3    | LGBM_ClassWeights         | 87.96% | 84.95% | 84.04%    | ~16             |
+| 4    | XGB_Calibrated_Sigmoid    | 87.91% | 82.80% | 81.91%    | ~18             |
+| 5    | XGB_Calibrated_Isotonic   | 87.88% | 79.57% | 90.24%    | ~8              |
 
-### Cost-Sensitive Analysis
+**Key Insight:** LGBM_Optimized_F2 has same PR-AUC and recall as #2 but **62.5% fewer false positives**
 
-**LGBM - Business Scenario (FN costs 100x more than FP):**
+**LGBM Champion - Business Scenario (FN costs more than FP):**
 
 | FN/FP Ratio | Threshold | Recall | Precision | Cost Reduction | Use Case               |
 |-------------|-----------|--------|-----------|----------------|------------------------|
-| 50:1        | 0.23      | 86.02% | 85.11%    | 12.4%          | Moderate risk          |
-| 100:1       | 0.23      | 86.02% | 85.11%    | **12.9%**      | **Banking standard**   |
-| 200:1       | 0.23      | 86.02% | 85.11%    | 13.1%          | High-risk industry     |
-| 500:1       | 0.23      | 86.02% | 85.11%    | 13.2%          | Critical infrastructure|
+| 50:1        | 0.23      | 86.02% | 85.11%    | 12.40%         | Moderate risk          |
+| **100:1** ⭐ | **0.23**  | **86.02%** | **85.11%** | **12.86%** | **Banking standard**   |
+| 200:1       | 0.23      | 85.11% | 85.11%    | 13.10%         | High-risk industry     |
+| 500:1       | 0.23      | 86.02% | 85.11%    | 13.24%         | Critical infrastructure|
 
-**XGBoost - More Aggressive Strategy:**
-
-| FN/FP Ratio | Threshold | Recall | Precision | Cost Reduction |
-|-------------|-----------|--------|-----------|----------------|
-| 100:1       | 0.07      | 92.47% | 20.72%    | **22.8%**      |
-| 200:1       | 0.07      | 92.47% | 20.72%    | **34.3%**      |
+**Real-World Performance (Test Set: 56,956 transactions, 93 frauds):**
+- **Default threshold (0.50):** 78 caught, 15 missed, 8 false alarms → Cost: $1,508
+- **F2-Optimized (0.60):** 78 caught, 15 missed, **3 false alarms** → Cost: $1,503 (62.5% fewer FPs)
+- **Cost-Sensitive (0.23):** 80 caught, 13 missed, 14 false alarms → Cost: $1,314 (12.86% savings)
 
 **Recommendation:** 
-- **Conservative:** LGBM threshold 0.23 (balanced recall/precision)
-- **Aggressive:** XGBoost threshold 0.07 (maximum fraud detection)
+- **Production Default:** F2-Optimized (0.60) - Best precision (96.30%) with strong recall
+- **High-Risk Periods:** Cost-Sensitive (0.23) - Catches 2 more frauds but 11 more false alarms
 
 ---
 
@@ -355,22 +358,29 @@ python predict_fraud.py
 
 **LGBM_Optimized_F2 (Champion) compared to alternatives:**
 
-**vs LGBM_Calibrated_Isotonic:**
+**vs LGBM_Calibrated_Isotonic (Base Model):**
 - ✅ Same PR-AUC (88.07%)
 - ✅ Same recall (83.87%)
-- ✅ **11% higher precision** (96.30% vs 90.70%)
-- ✅ **63% fewer false alarms** (40 vs 109 per 1000 transactions)
-- ✅ Optimized threshold (0.60) balances precision and recall
+- ✅ **5.6% higher precision** (96.30% vs 90.70%)
+- ✅ **62.5% fewer false alarms** (3 vs 8 per 56,956 transactions)
+- ✅ Optimized threshold (0.60) balances precision and recall perfectly
 
 **Compared to XGBoost:**
 - ✅ Better PR-AUC (88.07% vs 87.91%)
-- ✅ Higher precision (96.30% vs 90.24%)
+- ✅ Higher precision (96.30% vs 90.24% for XGB_Calibrated_Isotonic)
 - ✅ Faster training (gradient-based tree growth)
+- ✅ Better calibration (Brier score: 0.034 vs 0.041)
 
 **Compared to Random Forest:**
 - ✅ Higher PR-AUC (88.07% vs 84.95%)
 - ✅ Better recall (83.87% vs 78.49%)
 - ✅ More efficient (boosting vs bagging)
+- ✅ Faster inference time
+
+**Compared to Ensembles:**
+- ✅ Simpler deployment (single model vs 3 models)
+- ✅ Similar performance (88.07% vs 87.24% for Voting ensemble)
+- ✅ Lower latency in production
 
 ### Why Class Weights > SMOTE?
 
