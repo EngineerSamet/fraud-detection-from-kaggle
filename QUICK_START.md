@@ -192,7 +192,38 @@ python main.py
 
 ## 🧪 Test Deployment Pipeline
 
-After training completes, test the production inference pipeline:
+### Option 1: Streamlit Web Application (Interactive Demo) 🌐 **RECOMMENDED**
+
+Launch the interactive web interface for real-time fraud detection:
+
+```bash
+streamlit run app.py
+```
+
+**What You'll Get:**
+- 🎨 **Beautiful Web Interface** - Professional dashboard with charts and visualizations
+- 📊 **Real Transaction Examples** - Test with 18 pre-loaded examples (9 fraud + 9 normal)
+- 🎛️ **Manual Input** - Enter custom transaction data
+- 📈 **Live Predictions** - See probability gauges, confidence levels, and recommendations
+- 🔍 **Threshold Comparison** - Compare all 6 threshold strategies side-by-side
+- 📉 **Feature Analysis** - View top SHAP features and anomaly scores
+
+**Access:** Browser will open automatically at `http://localhost:8501`
+
+**Demo Features:**
+- ✅ Load real examples with one click
+- ✅ Adjust threshold strategies interactively
+- ✅ See fraud probability gauge (0-100%)
+- ✅ View detailed SHAP feature importance
+- ✅ Export predictions to CSV
+
+**Perfect for:** Presentations, demonstrations, and interactive testing
+
+---
+
+### Option 2: Command-Line Testing (Quick Test)
+
+Test the production inference pipeline via terminal:
 
 ```bash
 python predict_fraud.py
@@ -327,25 +358,34 @@ X_sample = X_data.sample(n=500, random_state=42)  # Use 500 samples
 
 ## 🎯 Next Steps
 
-### 1. Explore Results (5 min)
+### 1. Launch Interactive Demo (5 min) 🌟 **START HERE**
+```bash
+streamlit run app.py
+```
+- Best way to understand the project
+- Interactive fraud detection interface
+- Test real examples with one click
+- Perfect for presentations
+
+### 2. Explore Results (5 min)
 - Open `outputs/fraud_detection_final/results/model_comparison.csv`
 - View top 5 models and their metrics
 - Check cost-sensitive analysis results
 
-### 2. View Visualizations (10 min)
+### 3. View Visualizations (10 min)
 - Confusion matrices show prediction accuracy
 - PR curves compare model performance
 - SHAP plots explain feature importance
 
-### 3. Test Deployment Pipeline (5 min)
+### 4. Test Command-Line Pipeline (Optional)
 ```bash
 python predict_fraud.py
 ```
-- See real-time fraud prediction
-- Understand different threshold strategies
-- View risk level classification
+- Terminal-based fraud prediction demo
+- Shows all 6 threshold strategies
+- Good for automation/scripting
 
-### 4. Read Full Documentation (30 min)
+### 5. Read Full Documentation (30 min)
 - See `README.md` for complete methodology
 - Understand why class weights beat SMOTE
 - Learn about model selection rationale

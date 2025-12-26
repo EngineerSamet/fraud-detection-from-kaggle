@@ -360,15 +360,33 @@ python main.py
 
 **Runtime:** ~12-15 minutes on modern CPU
 
-### 4. Test Production Pipeline
+### 4. Launch Interactive Demo (Recommended) 🌟
+
+```bash
+streamlit run app.py
+```
+
+**Interactive Web Application Features:**
+- 🎨 Professional dashboard with real-time fraud detection
+- 📊 Test with 18 pre-loaded real examples (9 fraud + 9 normal)
+- 🎛️ Manual transaction input with custom values
+- 📈 Live probability gauges and confidence levels
+- 🔍 Compare all 6 threshold strategies side-by-side
+- 📉 SHAP feature importance visualization
+
+**Access:** Opens automatically at `http://localhost:8501`
+
+**Perfect for:** Presentations, demonstrations, and interactive testing
+
+### 5. Test Command-Line Pipeline (Optional)
 
 ```bash
 python predict_fraud.py
 ```
 
-**Output:** Demo prediction with 6 threshold strategies (default, f2_optimized, cost_50/100/200/500)
+**Output:** Terminal-based demo prediction with 6 threshold strategies (default, f2_optimized, cost_50/100/200/500)
 
-### 5. Additional Testing Scripts (Optional)
+### 6. Additional Testing Scripts (Optional)
 
 **Test LGBM Threshold Optimization:**
 ```bash
