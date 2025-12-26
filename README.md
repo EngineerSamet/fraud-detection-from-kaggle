@@ -212,7 +212,7 @@ All features (V1-V28) are anonymized PCA components. This limits:
 **Interpretation:** Low standard deviation indicates models generalize well across different data splits.
 
 ### Phase 8: Production Deployment Pipeline
-**File:** `predict_fraud.py` (542 lines, production-ready)
+**File:** `predict_fraud.py` (478 lines, production-ready)
 
 **Features:**
 - Load models once at startup (IsolationForest, LightGBM)
@@ -229,16 +229,17 @@ from predict_fraud import load_fraud_detection_models, predict_single_transactio
 # Load once at startup
 pipeline = load_fraud_detection_models()
 
-# Predict fraud for new transaction
-transaction = {'Time': 12345, 'V1': -2.30, ..., 'Amount': 199.50}
-result = predict_single_transaction(transaction, pipeline, threshold_type='f2_optimized')
+# Predict fraud for new transaction (manual demo example)
+transaction = {'Time': 12345, 'V1': -2.30, ..., 'V14': -7.80, 'Amount': 199.50}
+result = predict_single_transaction(transaction, pipeline, threshold_type='cost_100')
 
-# Result
+# Example Result (from predict_fraud.py demo)
 {
-    'fraud_probability': 0.9999,
+    'fraud_probability': 0.7163,
     'decision': 'FRAUD',
-    'confidence': 'CRITICAL',
-    'threshold_used': 0.60,
+    'confidence': 'VERY HIGH',
+    'threshold_used': 0.23,
+    'threshold_type': 'cost_100',
     'anomaly_score': -0.5457,
     'recommended_action': 'BLOCK TRANSACTION IMMEDIATELY'
 }
@@ -248,6 +249,12 @@ result = predict_single_transaction(transaction, pipeline, threshold_type='f2_op
 - `'default'` (0.50) - sklearn default
 - `'f2_optimized'` (0.60) - **Recommended for production** (96.30% precision)
 - `'cost_50'` to `'cost_500'` (0.23) - Business cost optimization
+
+**📌 Note:** The example above uses a manually created demo transaction. To test **real transactions from the dataset**, use:
+```bash
+streamlit run app.py  # Interactive web interface with 18 real examples (9 fraud + 9 normal)
+python test_all_examples.py  # Command-line testing with real dataset examples
+```
 
 ---
 
@@ -677,7 +684,7 @@ This project welcomes contributions! Areas for improvement:
 2. **Additional Models:** CatBoost, Neural Networks
 3. **Deployment:** FastAPI/Flask REST API wrapper
 4. **Monitoring:** MLflow integration, performance tracking
-5. **Documentation:** Jupyter notebooks with step-by-step explanations
+5. **Documentation:** Python scripts with comprehensive documentation and docstrings
 
 ---
 **Dataset:**
