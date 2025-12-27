@@ -733,6 +733,7 @@ This project welcomes contributions! Areas for improvement:
 
 **Course:** Introduction to Machine Learning  
 **Institution:** Mugla Sitki Kocman University
+
 **Semester:** Fall 2024-2025
 
 ---
@@ -747,10 +748,10 @@ This project welcomes contributions! Areas for improvement:
 If you use this project in your research or work, please cite:
 
 ```bibtex
-@misc{fraud_detection_2024,
+@misc{fraud_detection_2025,
   author = {Şanlıkan, Samet},
   title = {Credit Card Fraud Detection - Production-Ready ML System},
-  year = {2024},
+  year = {2025},
   publisher = {GitHub},
   url = {https://github.com/EngineerSamet/fraud-detection-from-kaggle}
 }
