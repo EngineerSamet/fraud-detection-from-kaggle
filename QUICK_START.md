@@ -23,8 +23,8 @@
 ### Step 1: Clone/Download Project
 
 ```bash
-git clone https://github.com/EngineerSamet/fraud-detection.git
-cd fraud-detection
+git clone https://github.com/EngineerSamet/fraud-detection-from-kaggle.git
+
 ```
 
 Or download ZIP and extract.
