@@ -734,7 +734,7 @@ This project welcomes contributions! Areas for improvement:
 **Course:** Introduction to Machine Learning  
 **Institution:** Mugla Sitki Kocman University
 
-**Semester:** Fall 2024-2025
+**Semester:** Fall 2025-2026
 
 ---
 
